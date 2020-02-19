@@ -27,11 +27,10 @@ echo "File $FILE EXISTS"
 
 else 
 echo "Creating $FILE and changing permission to 600"
-$(touch "$DIRECTORY"/authorized_keys)
+$(touch $FILE)
 $(chmod 600 /.ssh/authorized_keys)
 
 fi
-echo $(stat -c %a /.ssh/authorized_keys) 
 
 if [ $(stat -c %a /.ssh/authorized_keys) -eq "600" ]; then
 
@@ -41,4 +40,16 @@ else
 echo "file have wrong permission"
 echo "Changing permissions to 600..."
 $(chmod 600 /.ssh/authorized_keys)
+fi
+
+echo "Generating new pair of RSA keys..."
+FILE_NAME="my.key"
+echo "$FILE_NAME"".pub"
+if [[  -f /.ssh/"$FILE_NAME" ]] || [[  -f /.ssh/"$FILE_NAME"".pub" ]]  ;then 
+echo "$FILE_NAME"".pub OR $FILE_NAME exists"
+fi
+if [[ ! -f /.ssh/"$FILE_NAME" ]] &&  [[ !  -f /.ssh/"$FILE_NAME"".pub" ]] ;then 
+ 
+echo "Creating priv key"
+$(ssh-keygen -t rsa -N "" -f /.ssh/my.key)
 fi
