@@ -51,11 +51,11 @@ esac
 
 generating () {
 echo "Generating new pair of RSA keys..."
-read -p "Write name of private key _(SERVER IP)" FILE_NAME
+read -p "Write name of private key (SERVER IP): " FILE_NAME
 if [[  -f /root/.ssh/"$FILE_NAME" ]] || [[  -f /root/.ssh/"$FILE_NAME"".pub" ]]  ;then 
-echo "$FILE_NAME"".pub OR $FILE_NAME exists"
-
-echo "Check out directory ~/.ssh  and comeback to script!"
+echo "$FILE_NAME"".pub OR $FILE_NAME    EXISTS!"
+sleep 1 ; clear;
+echo "CHECK OUT directory ~/.ssh  and comeback to script!"
 sleep 2 ; exit
 fi
 if [[ ! -f /root/.ssh/"$FILE_NAME" ]] &&  [[ !  -f /root/.ssh/"$FILE_NAME"".pub" ]] ;then 
@@ -66,9 +66,17 @@ fi
 
 eval $(ssh-agent)
 $(ssh-add ~/.ssh/"$FILE_NAME")
-read -p "Write IP addr remote server: " ip_addr
-ssh-copy-id -i "/root/.ssh/""$FILE_NAME"".pub" "$ip_addr"  
+if [ $(ssh-copy-id -i "/root/.ssh/""$FILE_NAME"".pub" "$FILE_NAME") ] ; then
 
+echo "Success!"
+
+echo "To connect with Your remote server write Yes"
+read -p "Option: " choose
+if [ $choose == "Yes" ] ;then
+ 
+ssh -vvv $ip_addr
+fi
+fi
 echo " "
 echo "1. Back to menu"
 read -p "Option: " back
@@ -79,10 +87,6 @@ case $back in
 esac 
 }
 
-remote () {
-ssh -vvv $ip_addr
-
-}
 
  
 main() {
