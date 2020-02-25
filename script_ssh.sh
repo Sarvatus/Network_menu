@@ -3,10 +3,10 @@
 menu () {
 clear
 echo "####### SSHTOM #######"
+echo "Easy way to create SSH connection without password to any server"
 echo " "
 echo "1. Check existing of ~/.ssh directory"
-echo "2. Create ssh public and private keys and copy them to Your remote server"
-echo "3. Try Your remote connection"
+echo "2. Generate SSH keys and copy to authorized_keys on Your remote server"
 echo " "
 echo "Write exit to leave menu"
 
@@ -16,9 +16,8 @@ case "$option" in
 
 "1") clear ; check_existing ;;
 "2") clear ; generating ;;
-"3") clear ; remote ;; 
 "exit") clear ; echo "Bye" ; sleep1; clear ;;
-*)  clear ; echo "Write correct option!"
+*)  clear ; echo "Write correct option!" ; menu 
 esac
 }
 
@@ -33,7 +32,6 @@ echo " "
 if [ -d "$DIRECTORY" ]; then
 echo "DIRECTORY $DIRECTORY":" EXISTS!"
 echo "Check out directory ~/.ssh  and comeback to script!"
- 
 
 else
 echo "Creating $DIRECTORY and changing permission to 700"
@@ -52,21 +50,23 @@ esac
 generating () {
 echo "Generating new pair of RSA keys..."
 read -p "Write name of private key (SERVER IP): " FILE_NAME
-if [[  -f /root/.ssh/"$FILE_NAME" ]] || [[  -f /root/.ssh/"$FILE_NAME"".pub" ]]  ;then 
+if [[  -f ~/.ssh/"$FILE_NAME" ]] || [[  -f ~/.ssh/"$FILE_NAME"".pub" ]]  ;then 
 echo "$FILE_NAME"".pub OR $FILE_NAME    EXISTS!"
 sleep 1 ; clear;
 echo "CHECK OUT directory ~/.ssh  and comeback to script!"
 sleep 2 ; exit
-fi
-if [[ ! -f /root/.ssh/"$FILE_NAME" ]] &&  [[ !  -f /root/.ssh/"$FILE_NAME"".pub" ]] ;then 
- 
-echo "Creating priv key"
-$(ssh-keygen -t rsa -b 2048 -N "" -f /root/.ssh/"$FILE_NAME")
-fi
 
-eval $(ssh-agent)
-$(ssh-add ~/.ssh/"$FILE_NAME")
-if [ $(ssh-copy-id -i "/root/.ssh/""$FILE_NAME"".pub" "$FILE_NAME") ] ; then
+else  
+echo "Creating priv key"
+$(ssh-keygen -t rsa -b 2048 -N "" -f ~/.ssh/"$FILE_NAME")
+
+if [ -f ~/.ssh/config ] ; then
+
+echo -e "Host $FILE_NAME \n IdentityFile ~/.ssh/"$FILE_NAME"" >> ~/.ssh/config
+systemctl restart sshd ; sleep 5; clear  echo "wait!"
+fi
+$(ssh-copy-id -i ~/.ssh/"$FILE_NAME"".pub" "$FILE_NAME") 
+
 
 echo "Success!"
 
@@ -74,7 +74,7 @@ echo "To connect with Your remote server write Yes"
 read -p "Option: " choose
 if [ $choose == "Yes" ] ;then
  
-ssh -vvv $ip_addr
+ssh -vvv $FILE_NAME
 fi
 fi
 echo " "
