@@ -73,15 +73,35 @@ read -p "Type Your new IPv4 address: " ipaddr
 read -p "Please type lenght of mask: " len_mask
 nmcli connection modify $chos_prof ipv4.address "$ipaddr""/""$len_mask"
 
-
-
  
 }
 
 
+conf_netw () {
 
 
+dev_list=$(nmcli device | awk ' { print $1 } '| tail -n +2 )
+for gg in $dev_list; do
+xf+=($gg)
+done 
+ 
+read -p "Type name your connection profile: " prof_name
+clear
+read -p "Type the type of connection(ethernet): " prof_type
+clear
+echo "Devices: " ${xf[@]}
+read -p "Type name of a device: " prof_dev 
+clear
+read -p "Type Your new IPv4 address: " prof_addr
+clear
+read -p "Please type lenght of mask: " prof_mask
+clear
+read -p "Please type gateway address: " prof_gate
+clear 
+read -p "Please type dns address: " prof_dns
 
+nmcli connection add con-name "$prof_name"  ifname "$prof_dev" type "$prof_type" ipv4.address "$prof_addr""/""$prof_mask" ipv4.gateway "$prof_gate" ipv4.dns "$prof_dns" 
+}
 
 
 
